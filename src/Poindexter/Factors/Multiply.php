@@ -14,7 +14,7 @@ final class Multiply extends AbstractFunctor
         return $first->getValue() * $second->getValue();
     }
 
-    protected function getType()
+    public function getType(): string
     {
         return 'multiply';
     }

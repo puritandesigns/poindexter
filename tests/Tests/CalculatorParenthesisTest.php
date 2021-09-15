@@ -2,11 +2,13 @@
 
 namespace Tests;
 
-use Implementation\Factor;
-use Implementation\Functor;
-use Implementation\Integer;
 use PHPUnit\Framework\TestCase;
 use Poindexter\Calculator;
+use Poindexter\Factors\Add;
+use Poindexter\Factors\Multiply;
+use Poindexter\Factors\Number;
+use Poindexter\Factors\Parenthesis;
+use Poindexter\Interfaces\ResultInterface;
 
 class CalculatorParenthesisTest extends TestCase
 {
@@ -14,19 +16,11 @@ class CalculatorParenthesisTest extends TestCase
     {
         $factors = [];
 
-        $factors[] = new Factor(['type' => 'parenthesis_open']);
-
-            $factors[] = new Factor(['type' => 'parenthesis_open']);
-
-                $factors[] = new Factor(['type' => 'parenthesis_open']);
-
-                    $factors[] = new Integer(1);
-
-                $factors[] = new Factor(['type' => 'parenthesis_close']);
-
-            $factors[] = new Factor(['type' => 'parenthesis_close']);
-
-        $factors[] = new Factor(['type' => 'parenthesis_close']);
+        $factors[] = new Parenthesis([
+            new Parenthesis([
+                new Number(1, ResultInterface::INTEGER)
+            ])
+        ]);
 
         $calculator = new Calculator($factors);
 //For some reason, parseStatements returns an array with 3 indices:
@@ -41,39 +35,24 @@ class CalculatorParenthesisTest extends TestCase
 
     public function test_parenthesis_formula()
     {
-        $factors = [];
+        $inner_parenthesis = new Parenthesis([
+            new Number(1, ResultInterface::INTEGER),
+            new Multiply(),
+            new Number(2, ResultInterface::INTEGER),
+        ]);
 
-        $factors[] = new Factor(['type' => 'parenthesis_open']);
+        $factors = [
+            new Parenthesis([
+                new Number(1, ResultInterface::INTEGER),
+                new Add(),
+                $inner_parenthesis,
+                new Add(),
+                new Number(1, ResultInterface::INTEGER)
+            ]),
+            new Add(),
+            new Number(1, ResultInterface::INTEGER)
+        ];
 
-            $factors[] = new Integer(1);
-
-            $factors[] = new Functor('add');
-
-
-            $factors[] = new Factor(['type' => 'parenthesis_open']);
-
-                $factors[] = new Integer(1);
-
-                $factors[] = new Functor('multiply');
-
-                $factors[] = new Integer(2);
-
-            $factors[] = new Factor(['type' => 'parenthesis_close']);
-
-            $factors[] = new Functor('add');
-
-            $factors[] = new Integer(1);
-
-        $factors[] = new Factor(['type' => 'parenthesis_close']);
-
-        $factors[] = new Functor('add');
-
-        $factors[] = new Integer(1);
-
-        $calculator = new Calculator($factors, 'integer');
-
-        $actual = $calculator->calculate();
-
-        $this->assertEquals(5, $actual);
+        $this->assertEquals(5, Calculator::calculateInt($factors));
     }
 }

@@ -2,94 +2,64 @@
 
 namespace Poindexter\Factors;
 
-use Poindexter\Factors;
+use Poindexter\Calculator;
 use Poindexter\Interfaces\FactorInterface;
 use Poindexter\Interfaces\ResultInterface;
+use Poindexter\Result;
 use Poindexter\Traits\DeterminesFactorType;
 
-class Parenthesis implements FactorInterface, \ArrayAccess
+class Parenthesis extends Result implements FactorInterface
 {
-    /** @var \Poindexter\Factors */
+    /** @var FactorInterface[] */
     private $factors;
 
     use DeterminesFactorType;
 
     /**
      * Parenthesis constructor.
-     * @param \Poindexter\Factors|array $factors
+     * @param FactorInterface[] $factors
+     * @param string $return_type
      */
-    public function __construct($factors = [])
+    public function __construct($factors = [], string $return_type = 'float')
     {
-        if (is_array($factors)) {
-            $factors = new Factors($factors);
-        }
-
         $this->factors = $factors;
+
+        parent::__construct(null, $return_type);
     }
 
     public function calculate(
         ResultInterface $outer_result = null,
         FactorInterface $outer_next = null,
-        array $data = []
-    )
+        array $data = null
+    ): ResultInterface
     {
-echo __FILE__ . ' on line ' . __LINE__;
-echo '<pre style="background: white; width: 1000px;">' . PHP_EOL;
-print_r(compact('outer_next', 'outer_result'));
-echo PHP_EOL . '</pre>' . PHP_EOL;
-        $i = 0;
-        $count = count($this->factors);
-
-        $inner_result = null;
-        while ($i < $count) {
-            $current = $this->factors[$i];
-
-            $i++;
-
-            $next = null;
-            if (isset($this->factors[$i])) {
-                $next = $this->factors[$i];
-            }
-
-            $i++;
-
-            $inner_result = $current->calculate($inner_result, $next, $data);
+        if (empty($this->getValue())) {
+            $this->calculateParenthesisValue($data);
         }
 
-        if (null === $outer_next) {
-            return $inner_result;
-        }
-
-        return $outer_next->calculate($inner_result, $outer_result, $data);
+        return $this;
     }
 
-    protected function getType()
+    public function getType(): string
     {
         return 'parenthesis';
     }
 
-    public function addFactor(FactorInterface $factor)
+    public function preCalculate(array $data = null): void
     {
-        $this->factors->addFactor($factor);
+        if (empty($this->getValue())) {
+            $this->calculateParenthesisValue($data);
+        }
     }
 
-    public function offsetExists($offset)
+    private function calculateParenthesisValue(array $data = null)
     {
-        return $this->factors->offsetExists($offset);
-    }
+        $result = Calculator::calculateResult(
+            $this->factors,
+            $data,
+            $this->getResultType()
+        );
 
-    public function offsetGet($offset)
-    {
-        return $this->factors->offsetGet($offset);
-    }
-
-    public function offsetSet($offset, $value)
-    {
-        return $this->factors->offsetSet($offset, $value);
-    }
-
-    public function offsetUnset($offset)
-    {
-        return $this->factors->offsetUnset($offset);
+        $this->setValue($result->getValue());
     }
 }

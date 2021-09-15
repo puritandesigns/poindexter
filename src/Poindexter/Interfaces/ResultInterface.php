@@ -5,9 +5,10 @@ namespace Poindexter\Interfaces;
 interface ResultInterface
 {
     /** @var string Float return type */
-    const FLOAT = 'float';
+    public const FLOAT = 'float';
+
     /** @var string Integer return type */
-    const INTEGER = 'integer';
+    public const INTEGER = 'integer';
 
     /**
      * @param int $float_precision
@@ -15,13 +16,7 @@ interface ResultInterface
      */
     public function getValue($float_precision = 3);
 
-    /**
-     * @return string
-     */
-    public function getReturnType();
+    public function getResultType(): string;
 
-    /**
-     * @return bool
-     */
-    public function isFloat();
+    public function isFloat(): bool;
 }

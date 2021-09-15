@@ -15,19 +15,10 @@ final class Number extends Result implements FactorInterface
     public function calculate(
         ResultInterface $result = null,
         FactorInterface $next = null,
-        array $data = []
-    )
+        array $data = null
+    ): ResultInterface
     {
         if (null !== $result) {
-echo __FILE__ . ' on line ' . __LINE__;
-echo '<pre style="background: white; width: 1000px;">' . PHP_EOL;
-print_r([
-    'this' => $this,
-    'next' => $next,
-    'result' => $result,
-]);
-echo PHP_EOL . '</pre>' . PHP_EOL;
-
             throw new InvalidResultParameterException(
                 'A result object cannot be passed to a Number'
             );
@@ -40,8 +31,13 @@ echo PHP_EOL . '</pre>' . PHP_EOL;
         return $next->calculate($this);
     }
 
-    protected function getType()
+    public function getType(): string
     {
         return 'number';
+    }
+
+    public function preCalculate(array $data = null): void
+    {
+
     }
 }

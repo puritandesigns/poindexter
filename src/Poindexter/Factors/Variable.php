@@ -7,10 +7,15 @@ use Poindexter\Exceptions\VariableDataMissingException;
 use Poindexter\Interfaces\FactorInterface;
 use Poindexter\Interfaces\ResultInterface;
 use Poindexter\Result;
+use Poindexter\Traits\DeterminesFactorType;
 
 final class Variable extends Result implements FactorInterface
 {
+    use DeterminesFactorType;
+
     private $variable_name;
+
+    private $variable_compiled = false;
 
     /**
      * Variable constructor.
@@ -26,33 +31,28 @@ final class Variable extends Result implements FactorInterface
     }
 
     /**
-     * @param \Poindexter\Interfaces\ResultInterface $result
+     * @param \Poindexter\Interfaces\ResultInterface|null $result
      * @param \Poindexter\Interfaces\FactorInterface|null $next
-     * @param array $data
+     * @param array|null $data
      * @return $this|\Poindexter\Interfaces\ResultInterface
      * @throws \Poindexter\Exceptions\InvalidResultParameterException
-     * @throws \Poindexter\Exceptions\InvalidReturnTypeException
      * @throws \Poindexter\Exceptions\VariableDataMissingException
      */
     public function calculate(
-        ResultInterface $result,
+        ResultInterface $result = null,
         FactorInterface $next = null,
-        array $data = []
-    )
+        array $data = null
+    ): ResultInterface
     {
         if (null !== $result) {
             throw new InvalidResultParameterException(
-                'A result object cannot be passed to a Number'
+                'A result object cannot be passed to a variable'
             );
         }
 
-        if (! isset($data[$this->variable_name])) {
-            throw new VariableDataMissingException(
-                'Data missing to replace variable, ' . $this->variable_name
-            );
+        if (! $this->variable_compiled) {
+            $this->compileVariable($data);
         }
-
-        $this->setValue($data[$this->variable_name]);
 
         if (null === $next) {
             return $this;
@@ -61,8 +61,26 @@ final class Variable extends Result implements FactorInterface
         return $next->calculate($this);
     }
 
-    protected function getType()
+    public function getType(): string
     {
         return 'variable';
+    }
+
+    public function preCalculate(array $data = null): void
+    {
+        $this->compileVariable($data ?? []);
+    }
+
+    private function compileVariable(array $data = [])
+    {
+        if (! isset($data[$this->variable_name])) {
+            throw new VariableDataMissingException(
+                'Data missing to replace variable, ' . $this->variable_name
+            );
+        }
+
+        $this->setValue($data[$this->variable_name]);
+
+        $this->variable_compiled = true;
     }
 }

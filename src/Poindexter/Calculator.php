@@ -10,6 +10,7 @@ use Poindexter\Factors\Number;
 use Poindexter\Factors\Parenthesis;
 use Poindexter\Factors\Subtract;
 use Poindexter\Factors\Variable;
+use Poindexter\Interfaces\FactorInterface;
 use Poindexter\Interfaces\FactorModelInterface;
 use Poindexter\Interfaces\ResultInterface;
 
@@ -47,7 +48,7 @@ final class Calculator
      */
     public function calculate(array $data = null)
     {
-        $statements = $this->parseStatements($this->factors);
+        $statements = $this->factors;
 
         $factor = current($statements);
 
@@ -61,11 +62,49 @@ final class Calculator
         return new Result($result->getValue(), $this->return_type);
     }
 
+    public static function calculateInt(array $factors, array $data = null): int
+    {
+        $result = self::calculateResult(
+            $factors,
+            $data,
+            ResultInterface::INTEGER
+        );
+
+        return $result->getValue();
+    }
+
+    public static function calculateFloat(array $factors, array $data = null): float
+    {
+        $result = self::calculateResult(
+            $factors,
+            $data
+        );
+
+        return $result->getValue();
+    }
+
     /**
-     * @param \Poindexter\Interfaces\FactorModelInterface|false $factor
-     * @param Factors $statements
+     * @param FactorInterface[] $factors
+     * @param array|null $data
+     * @param string $result_type
+     * @return \Poindexter\Interfaces\ResultInterface
+     */
+    public static function calculateResult(
+        $factors,
+        array $data = null,
+        string $result_type = 'float'
+    ): ResultInterface
+    {
+        $calculator = new self($factors, $result_type);
+
+        return $calculator->calculate($data);
+    }
+
+    /**
+     * @param \Poindexter\Interfaces\FactorInterface|false $factor
+     * @param FactorInterface[] $statements
      * @param ResultInterface|null $result
-     * @param array $data
+     * @param array|null $data
      * @return ResultInterface
      */
     private function calculateFactor(
@@ -78,53 +117,49 @@ final class Calculator
         if (! $factor) {
             return $result;
         }
-echo 'START OF calculateFactor FUNCTION ' . __FILE__ . ' on line ' . __LINE__ . PHP_EOL;
-print_r($factor);
-echo PHP_EOL;
+
+        $factor->preCalculate($data);
 
         if ($factor->isVariable()) {
             /** @var \Poindexter\Factors\Variable $factor */
             $result = $factor->calculate($result, null, $data);
-
-//            $factor = next($statements);
         }
 
         elseif (null !== $result && $factor->isNumber()) {
             echo 'this should not be possible'; exit;
             /** @var \Poindexter\Factors\Number $factor */
             $result = $factor->calculate($result);
-
-//            $factor = next($statements);
         }
 
         elseif ($factor->isNumber()) {
             /** @var \Poindexter\Factors\Number $factor */
             $result = $factor->calculate($result);
-
-//            $factor = next($statements);
         }
 
         elseif ($factor->isFunctor()) {
             /** @var \Poindexter\Factors\AbstractFunctor $factor */
             $second = next($statements);
 
-            $result = $factor->calculate($result, $second, $data);
+            $second->preCalculate($data);
 
-//            $factor = next($statements);
+            $result = $factor->calculate($result, $second, $data);
+        }
+
+        elseif ($factor->isComparator()) {
+            /** @var \Poindexter\Factors\AbstractFunctor $factor */
+            $second = next($statements);
+
+            $second->preCalculate($data);
+
+            $result = $factor->calculate($result, $second, $data);
         }
 
         elseif ($factor->isParenthesis()) {
             $result = $factor->calculate($result);
-
-//            $factor = next($statements);
         }
 
         $factor = next($statements);
 
-echo 'END OF calculateFactor FUNCTION ' . __FILE__ . ' on line ' . __LINE__ . PHP_EOL;
-print_r($factor);
-print_r($result);
-echo PHP_EOL;
         return $this->calculateFactor($factor, $statements, $result, $data);
     }
 
@@ -162,24 +197,8 @@ echo PHP_EOL;
         &$statements = []
     )
     {
-        if (false === $factor || $factor->isParenthesisClose()) {
+        if (false === $factor) {
             return null;
-        }
-
-        if ($factor->isParenthesisOpen()) {
-            $length = $this->getParenthesisCloseIndex($factors) - $index;
-
-            unset($factors[$index], $factors[$length]);
-
-            $subfactors = array_slice($factors, 0, $length - 1);
-
-            foreach (range($index + 1, $length - 1) as $item) {
-                unset($factors[$item]);
-            }
-
-            $statements[] = new Parenthesis($this->parseStatements($subfactors));
-
-            return $length;
         }
 
         $statements[] = $this->forgeTypeObject($factor);
@@ -212,22 +231,14 @@ echo PHP_EOL;
      */
     private function forgeTypeObject($type)
     {
-        if ($type->isNumber()) {
-            return new Number($type->getValue(), $type->getResultType());
-        }
-
-        if ($type->isVariable()) {
-            return new Variable($type->getValue(), $type->getResultType());
-        }
-
-        if ($type->isFunctor()) {
+        if (! $type instanceof FactorInterface) {
             return $this->forgeFunctorObject($type);
         }
 
         return $type;
     }
 
-    private function forgeFunctorObject(FactorModelInterface $type)
+    private function forgeFunctorObject(FactorInterface $type)
     {
         if ($type->isType('add')) {
             return new Add();

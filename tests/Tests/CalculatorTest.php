@@ -2,13 +2,14 @@
 
 namespace Tests;
 
-use Implementation\Factor;
-use Implementation\Functor;
-use Implementation\Integer;
-use Implementation\Number;
 use PHPUnit\Framework\TestCase;
 use Poindexter\Calculator;
+use Poindexter\Factors\Add;
+use Poindexter\Factors\Divide;
 use Poindexter\Factors\Multiply;
+use Poindexter\Factors\Number;
+use Poindexter\Factors\Subtract;
+use Poindexter\Factors\Variable;
 use Poindexter\Interfaces\ResultInterface;
 
 class CalculatorTest extends TestCase
@@ -19,7 +20,7 @@ class CalculatorTest extends TestCase
 
         $factors[] = new Number(1, 'integer');
 
-        $factors[] = new Functor('add');
+        $factors[] = new Add();
 
         $factors[] = new Number(1, 'integer');
 
@@ -27,7 +28,7 @@ class CalculatorTest extends TestCase
 
         $actual = $calculator->calculate();
 
-        $this->assertEquals(2, $actual);
+        $this->assertEquals(2, $actual->getValue());
     }
 
     public function test_simple_multiply_calculation()
@@ -44,126 +45,92 @@ class CalculatorTest extends TestCase
 
         $actual = $calculator->calculate();
 
-        $this->assertEquals(4, $actual);
+        $this->assertEquals(4, $actual->getValue());
     }
 
     public function test_simple_subtract_calculation()
     {
-        /** @var \Conflux\Calculator $calculator */
-        $calculator = factory(\Conflux\Calculator::class)->create();
+        $factors = [];
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => 2]);
+        $factors[] = new Number(2, 'integer');
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('subtract')
-            ->create();
+        $factors[] = new Subtract();
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => 1]);
+        $factors[] = new Number(1, 'integer');
+
+        $calculator = new Calculator($factors, ResultInterface::INTEGER);
 
         $actual = $calculator->calculate();
 
-        $this->assertEquals(1, $actual);
+        $this->assertEquals(1, $actual->getValue());
     }
 
     public function test_simple_divide_calculation()
     {
-        /** @var \Conflux\Calculator $calculator */
-        $calculator = factory(\Conflux\Calculator::class)->create();
+        $factors = [];
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => 4]);
+        $factors[] = new Number(4, 'integer');
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('divide')
-            ->create();
+        $factors[] = new Divide();
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => 2]);
+        $factors[] = new Number(2, 'integer');
+
+        $calculator = new Calculator($factors, ResultInterface::INTEGER);
 
         $actual = $calculator->calculate();
 
-        $this->assertEquals(2, $actual);
+        $this->assertEquals(2, $actual->getValue());
     }
 
     public function test_multiple_add_calculations()
     {
-        /** @var \Conflux\Calculator $calculator */
-        $calculator = factory(\Conflux\Calculator::class)->create();
+        $factors = [];
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => 1]);
+        $factors[] = new Number(1, 'integer');
 
-        factory(\Conflux\CalculatorFactor::class)->create();
+        $factors[] = new Add();
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => 1]);
+        $factors[] = new Number(1, 'integer');
 
-        factory(\Conflux\CalculatorFactor::class)->create();
+        $factors[] = new Add();
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => 1]);
+        $factors[] = new Number(1, 'integer');
+
+        $calculator = new Calculator($factors, ResultInterface::INTEGER);
 
         $actual = $calculator->calculate();
 
-        $this->assertEquals(3, $actual);
+        $this->assertEquals(3, $actual->getValue());
     }
 
     public function test_concrete_formula_calculation()
     {
-        /** @var \Conflux\Calculator $calculator */
-        $calculator = factory(\Conflux\Calculator::class)->create([
-            'result_type' => 'float'
-        ]);
+        $factors = [];
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('variable')
-            ->create(['value' => 'thickness']);
+        $factors[] = new Variable('thickness');
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('divide')
-            ->create();
+        $factors[] = new Divide();
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => 12]);
+        $factors[] = new Number(12, ResultInterface::INTEGER);
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('multiply')
-            ->create();
+        $factors[] = new Multiply();
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('variable')
-            ->create(['value' => 'width']);
+        $factors[] = new Variable('width');
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('multiply')
-            ->create();
+        $factors[] = new Multiply();
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('variable')
-            ->create(['value' => 'height']);
+        $factors[] = new Variable('height');
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('multiply')
-            ->create();
+        $factors[] = new Multiply();
 
-        factory(\Conflux\CalculatorFactor::class)
-            ->state('number')
-            ->create(['value' => .037, 'variable_type' => 'float']);
+        $factors[] = new Number(.037);
+
+        $calculator = new Calculator($factors);
 
         $actual = $calculator->calculate([
             'width' => 10, 'height' => 10, 'thickness' => 4,
         ]);
 
-        $this->assertEquals(1.23, round($actual, 2));
+        $this->assertEquals(1.23, $actual->getValue(2));
     }
 }

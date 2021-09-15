@@ -14,7 +14,7 @@ abstract class AbstractFunctor implements FactorInterface
     /**
      * @param \Poindexter\Interfaces\ResultInterface $result
      * @param \Poindexter\Interfaces\FactorInterface|null $next
-     * @param array $data
+     * @param array|null $data
      * @return \Poindexter\Interfaces\ResultInterface|\Poindexter\Result
      * @throws \Poindexter\Exceptions\InvalidFactorParameterException
      * @throws \Poindexter\Exceptions\InvalidReturnTypeException
@@ -22,33 +22,28 @@ abstract class AbstractFunctor implements FactorInterface
     public function calculate(
         ResultInterface $result,
         FactorInterface $next = null,
-        array $data = []
-    )
+        array $data = null
+    ): ResultInterface
     {
-echo __FILE__ . ' on line ' . __LINE__;
-echo '<pre style="background: white; width: 1000px;">' . PHP_EOL;
-print_r([
-    'this' => $this,
-    'result' => $result,
-    'next' => $next,
-]);
-echo PHP_EOL . '</pre>' . PHP_EOL;
-
-
         if (! ($next instanceof ResultInterface)) {
             throw new InvalidFactorParameterException(
-                ''
+                'Expecting $next to be a ResultInterface'
             );
         }
 
         $number = $this->doTheMath($result, $next);
 
-        $return_type = 'integer';
+        $return_type = ResultInterface::INTEGER;
         if ($result->isFloat() || $next->isFloat()) {
-            $return_type = 'float';
+            $return_type = ResultInterface::FLOAT;
         }
 
         return new Result($number, $return_type);
+    }
+
+    public function preCalculate(array $data = null): void
+    {
+
     }
 
     /**

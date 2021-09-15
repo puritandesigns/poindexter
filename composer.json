@@ -1,6 +1,6 @@
 {
     "name": "newmediaretailer/poindexter",
-    "description": "A formula calculating library",
+    "description": "A formula-calculating library",
     "type": "library",
     "minimum-stability": "dev",
     "prefer-stable": true,
@@ -23,7 +23,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": "tests/Tests"
+            "Implementation\\": "tests/Implementation/",
+            "Tests\\": "tests/Tests/"
         }
     }
 }

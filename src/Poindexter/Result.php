@@ -46,7 +46,7 @@ class Result implements ResultInterface
 
     public function setValue($value)
     {
-        if (! is_int($value) || ! is_float($value)) {
+        if (! is_int($value) && ! is_float($value)) {
             throw new InvalidReturnTypeException(
                 'The value to set on a result must be an integer or float'
             );
@@ -55,13 +55,13 @@ class Result implements ResultInterface
         $this->value = $value;
     }
 
-    public function getReturnType()
+    public function getResultType(): string
     {
         return $this->return_type;
     }
 
-    public function isFloat()
+    public function isFloat(): bool
     {
-        return ResultInterface::FLOAT === $this->getReturnType();
+        return ResultInterface::FLOAT === $this->getResultType();
     }
 }
