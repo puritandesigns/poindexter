@@ -14,7 +14,7 @@ interface ResultInterface
      * @param int $float_precision
      * @return int|float
      */
-    public function getValue($float_precision = 3);
+    public function getValue(int $float_precision = 3);
 
     public function getResultType(): string;
 

@@ -23,7 +23,7 @@ final class Variable extends Result implements FactorInterface
      * @param string $return_type
      * @throws \Poindexter\Exceptions\InvalidReturnTypeException
      */
-    public function __construct($variable_name, $return_type = 'float')
+    public function __construct(string $variable_name, string $return_type = 'float')
     {
         $this->variable_name = $variable_name;
 

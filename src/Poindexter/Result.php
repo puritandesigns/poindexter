@@ -18,7 +18,7 @@ class Result implements ResultInterface
      * @param string $return_type Must be either integer or float
      * @throws \Poindexter\Exceptions\InvalidReturnTypeException
      */
-    public function __construct($value, $return_type = 'float')
+    public function __construct($value, string $return_type = 'float')
     {
         $this->value = $value;
 
@@ -35,7 +35,7 @@ class Result implements ResultInterface
         $this->return_type = $return_type;
     }
 
-    public function getValue($float_precision = 3)
+    public function getValue(int $float_precision = 3)
     {
         if ($this->isFloat()) {
             return round($this->value, $float_precision);

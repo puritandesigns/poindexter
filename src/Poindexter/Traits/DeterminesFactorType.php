@@ -9,18 +9,6 @@ trait DeterminesFactorType
         return $this->isType('parenthesis');
     }
 
-//    /** @return bool */
-//    public function isParenthesisOpen(): bool
-//    {
-//        return $this->isType('parenthesis_open');
-//    }
-//
-//    /** @return bool */
-//    public function isParenthesisClose(): bool
-//    {
-//        return $this->isType('parenthesis_close');
-//    }
-
     public function isVariable(): bool
     {
         return $this->isType('variable');

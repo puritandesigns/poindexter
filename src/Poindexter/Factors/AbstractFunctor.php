@@ -11,6 +11,7 @@ use Poindexter\Traits\DeterminesFactorType;
 abstract class AbstractFunctor implements FactorInterface
 {
     use DeterminesFactorType;
+
     /**
      * @param \Poindexter\Interfaces\ResultInterface $result
      * @param \Poindexter\Interfaces\FactorInterface|null $next

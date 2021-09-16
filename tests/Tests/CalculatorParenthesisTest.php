@@ -23,11 +23,7 @@ class CalculatorParenthesisTest extends TestCase
         ]);
 
         $calculator = new Calculator($factors);
-//For some reason, parseStatements returns an array with 3 indices:
-//    0 => Parenthesis (with the number)
-//    1 => Parenthesis (that is empty)
-//    2 => Number (the same one that is in the first parenthesis)
-//What should be returned is just the one parenthesis with the number
+
         $actual = $calculator->calculate();
 
         $this->assertEquals(1, $actual->getValue());
