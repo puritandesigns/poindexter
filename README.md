@@ -38,10 +38,10 @@ Parser::calculate('(1 + x) * (1 + y)', ['x' => 1, 'y' => 2])->getValue();
 A couple of things to keep in mind....
 
 ### The Parser is pretty lazy.
-    - It cannot parse nested parentheses
-    - It needs a space between elements:
-        - `x+y` would be understood as a variable instead of 3 distinct statements
-        - `x + y` would be understood as variable x adding with variable y
+- It cannot parse nested parentheses
+- It needs a space between elements:
+    - `x+y` would be understood as a variable instead of 3 distinct statements
+    - `x + y` would be understood as variable x adding with variable y
 
 ### You can manually build more-complicated statements from Factors objects
 ```php
