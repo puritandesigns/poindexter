@@ -60,13 +60,16 @@ $factors = [
             new Factors\Number(5)
         ])
     ]),
-    new Factors\Divide(5)
+    new Factors\Divide(),
+    new Factors\Number(5)
 ];
 
 $calculator = new \Poindexter\Calculator($factors, ResultInterface::INTEGER);
 
 $calculator->calculate()->getValue();
 ```
+
+See tests for more examples.
 
 ### Be careful with Comparators
 Incorporating `<`, `>`, `=`, etc... yields a binary (1 or 0) result for that particular expression. If you are not careful, that might change the intention of your formulas.
