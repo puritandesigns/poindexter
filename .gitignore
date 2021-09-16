@@ -2,6 +2,7 @@
 .idea
 .phpunit.result.cache
 tests/data/*.json
+composer.lock
 composer-local.json
 composer-local.lock
 /public

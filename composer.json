@@ -1,17 +1,19 @@
 {
-    "name": "newmediaretailer/poindexter",
+    "name": "puritandesigns/poindexter",
     "description": "A formula-calculating library",
     "type": "library",
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "license": "proprietary",
+    "license": "MIT",
     "authors": [
         {
             "name": "Michael Kelly",
             "email": "puritandesigns@gmail.com"
         }
     ],
-    "require": {},
+    "require": {
+        "php": ">=7.4"
+    },
     "require-dev": {
         "roave/security-advisories": "dev-master",
         "phpunit/phpunit": "^8.3"
@@ -23,7 +25,6 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Implementation\\": "tests/Implementation/",
             "Tests\\": "tests/Tests/"
         }
     }
