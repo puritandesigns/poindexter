@@ -7,7 +7,7 @@ use Poindexter\Interfaces\ResultInterface;
 
 class Result implements ResultInterface
 {
-    /** @var float|int */
+    /** @var float|int|bool */
     private $value;
     /** @var string */
     private $return_type;
@@ -37,16 +37,16 @@ class Result implements ResultInterface
 
     public function getValue(int $float_precision = 3)
     {
-        if ($this->isFloat()) {
-            return round($this->value, $float_precision);
+        if (is_bool($this->value) || ! $this->isFloat()) {
+            return (int) $this->value;
         }
 
-        return (int) $this->value;
+        return round($this->value, $float_precision);
     }
 
     public function setValue($value)
     {
-        if (! is_int($value) && ! is_float($value)) {
+        if (! is_int($value) && ! is_float($value) && ! is_bool($value)) {
             throw new InvalidReturnTypeException(
                 'The value to set on a result must be an integer or float'
             );

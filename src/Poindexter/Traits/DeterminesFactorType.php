@@ -23,7 +23,7 @@ trait DeterminesFactorType
     {
         return in_array(
             $this->getType(),
-            ['greater_than', 'less_than', 'equals']
+            ['greater_than', 'less_than', 'equals', 'and', 'or']
         );
     }
 

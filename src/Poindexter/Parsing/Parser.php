@@ -11,6 +11,8 @@ use Poindexter\Factors\GreaterThan;
 use Poindexter\Factors\GreaterThanEquals;
 use Poindexter\Factors\LessThan;
 use Poindexter\Factors\LessThanEquals;
+use Poindexter\Factors\LogicalAnd;
+use Poindexter\Factors\LogicalOr;
 use Poindexter\Factors\Multiply;
 use Poindexter\Factors\Number;
 use Poindexter\Factors\Subtract;
@@ -30,6 +32,8 @@ class Parser
         '=' => Equals::class,
         '>' => GreaterThan::class,
         '<' => LessThan::class,
+        '&' => LogicalAnd::class,
+        '|' => LogicalOr::class,
     ];
 
     /**
