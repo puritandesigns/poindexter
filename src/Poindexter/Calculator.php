@@ -135,7 +135,7 @@ final class Calculator
             );
         }
         elseif ($factor->isNumber() || $factor->isParenthesis()) {
-            $result = $factor->calculate($result);
+            $result = $factor->calculate($result, null, $data);
         }
         elseif ($factor->isFunctor() || $factor->isComparator()) {
             $second = next($statements);
