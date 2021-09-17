@@ -29,6 +29,7 @@ class Parser
         '*' => Multiply::class,
         '>=' => GreaterThanEquals::class,
         '<=' => LessThanEquals::class,
+        '==' => Equals::class,
         '=' => Equals::class,
         '>' => GreaterThan::class,
         '<' => LessThan::class,
