@@ -32,7 +32,9 @@ class Parser
         '=' => Equals::class,
         '>' => GreaterThan::class,
         '<' => LessThan::class,
+        '&&' => LogicalAnd::class,
         '&' => LogicalAnd::class,
+        '||' => LogicalOr::class,
         '|' => LogicalOr::class,
     ];
 
