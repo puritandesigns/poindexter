@@ -15,6 +15,8 @@ use Poindexter\Factors\Multiply;
 use Poindexter\Factors\Number;
 use Poindexter\Factors\Subtract;
 use Poindexter\Factors\Variable;
+use Poindexter\Interfaces\FactorInterface;
+use Poindexter\Interfaces\ResultInterface;
 
 class Parser
 {
@@ -30,11 +32,17 @@ class Parser
         '<' => LessThan::class,
     ];
 
+    /**
+     * @param string|array $statement
+     * @param array|null $data
+     * @param string $return_type
+     * @return \Poindexter\Interfaces\ResultInterface
+     */
     public static function calculate(
-        string $statement,
+        $statement,
         array $data = null,
         string $return_type = 'float'
-    )
+    ): ResultInterface
     {
         $factors = self::parse($statement);
 
@@ -42,10 +50,40 @@ class Parser
     }
 
     /**
-     * @param string $statement
+     * @param string|array $statement
      * @return \Poindexter\Interfaces\FactorInterface[]
      */
-    public static function parse(string $statement): array
+    public static function parse($statement): array
+    {
+        if (is_array($statement)) {
+            return self::parseArray($statement);
+        }
+
+        return self::parseString($statement);
+    }
+
+    /**
+     * @param array $statements
+     * @return \Poindexter\Interfaces\FactorInterface[]
+     */
+    private static function parseArray(array $statements): array
+    {
+        $factors = [];
+        foreach ($statements as $index => $statement) {
+            if (is_array($statement)) {
+                $factors[] = new Parenthesis(self::parseArray($statement));
+            } elseif ($statement) {
+                $factors = array_merge(
+                    $factors,
+                    self::parseString($statement)
+                );
+            }
+        }
+
+        return self::parseStatementsIntoObjects($factors);
+    }
+
+    private static function parseString(string $statement): array
     {
         $statement = trim($statement);
 
@@ -69,9 +107,7 @@ class Parser
             }
         }
 
-        $statements = self::parseStatementsIntoObjects($statements);
-
-        return $statements;
+        return self::parseStatementsIntoObjects($statements);
     }
 
     private static function extractParenthesis(
@@ -126,9 +162,7 @@ class Parser
             return '';
         }
         
-        $remaining_statement = trim(substr($whole_statement, $length));
-
-        return $remaining_statement;
+        return trim(substr($whole_statement, $length));
     }
 
     private static function parseStatementsIntoObjects(array &$statements): array
@@ -142,7 +176,11 @@ class Parser
         }
 
         foreach ($statements as $index => $statement) {
-            if (is_array($statement)) {
+            if ($statement instanceof FactorInterface) {
+                $statements[$index] = $statement;
+                continue;
+            }
+            elseif (is_array($statement)) {
                 $statement = self::parseStatementsIntoObjects($statement);
             }
             elseif (is_numeric($statement)) {
@@ -152,15 +190,15 @@ class Parser
                 $functor = self::FUNCTORS[$statement];
                 $statement = new $functor();
             }
-            elseif (empty($statement)) {
-                unset($statements[$index]);
-                continue;
-            }
             elseif ($statement instanceof Parenthesis) {
                 $statement = $statement->toFactors();
             }
-            else {
+            elseif(is_string($statement)) {
                 $statement = new Variable($statement);
+            }
+            else {
+                unset($statements[$index]);
+                continue;
             }
 
             $statements[$index] = $statement;

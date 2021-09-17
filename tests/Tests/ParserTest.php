@@ -10,32 +10,41 @@ class ParserTest extends TestCase
 {
     public function test_parse_simple_statement()
     {
-        $statement = '3 + 4';
+        $result = Parser::calculate('3 + 4');
+        $this->assertEquals(7, $result->getValue());
 
-        $result = Parser::calculate($statement);
-
+        $result = Parser::calculate(['3', '+', '4']);
         $this->assertEquals(7, $result->getValue());
     }
 
     public function test_parse_statement_with_gator()
     {
-        $statement = '3 < 4';
+        $result = Parser::calculate('3 < 4');
+        $this->assertEquals(1, $result->getValue());
 
-        $result = Parser::calculate($statement);
-
+        $result = Parser::calculate(['3', '<', '4']);
         $this->assertEquals(1, $result->getValue());
     }
 
     public function test_parse_statement_with_equals()
     {
         $this->assertEquals(0, Parser::calculate('3 = 4')->getValue());
+        $this->assertEquals(0, Parser::calculate(['3', '=', '4'])->getValue());
 
         $this->assertEquals(1, Parser::calculate('4 = 4')->getValue());
+        $this->assertEquals(1, Parser::calculate(['4', '=', '4'])->getValue());
 
         $this->assertEquals(
             1,
             Parser::calculate(
                 'location_id = 99',
+                ['location_id' => 99]
+            )->getValue()
+        );
+        $this->assertEquals(
+            1,
+            Parser::calculate(
+                ['location_id', '=', '99'],
                 ['location_id' => 99]
             )->getValue()
         );
@@ -84,13 +93,11 @@ class ParserTest extends TestCase
     public function test_parse_multiple_parens()
     {
         $statement = '(1 + 2) + (:test_first * 2) - (-2 + 2)';
-        
         $result = Parser::calculate($statement, [':test_first' => 25]);
-
         $this->assertEquals(53, $result->getValue());
     }
 
-    public function test_parse_errors_on_nested_parens()
+    public function test_parse_errors_on_nested_parens_in_string()
     {
         try {
             Parser::calculate('(1 + (2 + 3))');
@@ -104,5 +111,27 @@ class ParserTest extends TestCase
                 $e->getMessage()
             );
         }
+    }
+
+    public function test_nested_parens_in_array()
+    {
+        $this->assertEquals(
+            6,
+            Parser::calculate([1, '+', [2, '+', 3]])->getValue()
+        );
+    }
+
+    public function test_parse_multiple_parens_in_array()
+    {
+        $result = Parser::calculate([
+                [1, '+', 2],
+                '+',
+                [':test_first', '*', 2],
+                '-',
+                [-2, '+', 2]
+            ],
+            [':test_first' => 25]
+        );
+        $this->assertEquals(53, $result->getValue());
     }
 }
